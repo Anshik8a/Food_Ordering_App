@@ -1,66 +1,70 @@
-
-import { useState, useEffect } from "react";
-import ShimmerCard from "./Shimmer";
+import MenuShimmer from "./ShimmerCardMenu";
 import { useParams } from "react-router-dom";
+import useRestaurantMenu from "../utils/useRestaurantMenu";
 
 const RestaurantMenu = () => {
-  const [resInfo, setResInfo] = useState(null);
   const { resId } = useParams();
+  const resInfo = useRestaurantMenu(resId);
 
-  useEffect(() => {
-    fetchMenu();
-  }, []);
-
-  const fetchMenu = async () => {
-    const data = await fetch(
-      "https://foodfire.onrender.com/api/menu?page-type=REGULAR_MENU&complete-menu=true&lat=21.1702401&lng=72.83106070000001&restaurantId=" + resId
+  if (resInfo === null) {
+    return (
+      <MenuShimmer />
     );
-
-    const json = await data.json();
-    console.log(json);
-    setResInfo(json.data);
-  };
-
-  if(resInfo === null) {
-   return <ShimmerCard/>  
   }
 
-   const restaurantInfo = resInfo?.cards
+  const restaurantInfo = resInfo?.cards
     ?.map((c) => c?.card?.card)
     ?.find((c) => c?.info);
 
   const { name, cuisines, costForTwoMessage } = restaurantInfo?.info || {};
 
-  const menuSections = resInfo?.cards?.[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards || [];
+  const menuSections =
+    resInfo?.cards?.[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards || [];
 
-  // itemCards?.card?.info;
-  // const {imageId} = resInfo?.cards?.[4].groupedCard?.cardGroupMap?.REGULAR?.cards?.card?.card?.itemCards?.card?.info;
   return (
-    <div className="menu">
-      <h1>{name}</h1>
-      <p>
-        {cuisines?.join(", ")} - {costForTwoMessage}
+    <div className="max-w-3xl mx-auto p-5">
+      {/* Restaurant Title */}
+      <h1 className="text-3xl font-bold text-gray-800 mb-2">{name}</h1>
+
+      {/* Cuisines */}
+      <p className="text-gray-600 text-lg mb-6">
+        {cuisines?.join(", ")} • {costForTwoMessage}
       </p>
 
-      <h2>Menu</h2>
+      {/* Menu Header */}
+      <h2 className="text-2xl font-semibold mb-4 text-gray-800 border-b pb-2">
+        Menu
+      </h2>
 
+      {/* Menu Sections */}
       {menuSections.map((section, index) => {
         const sectionTitle = section?.card?.card?.title;
         const items = section?.card?.card?.itemCards;
 
-        // Skip if no items (some sections have none)
         if (!items) return null;
 
         return (
-          <div key={index} className="menu-section">
-            <h3>{sectionTitle}</h3>
-            <ul>
+          <div key={index} className="mb-6">
+            <h3 className="text-xl font-semibold text-gray-700 mb-3">
+              {sectionTitle}
+            </h3>
+
+            <ul className="space-y-3">
               {items.map((item) => {
                 const info = item?.card?.info;
+
                 return (
-                  <li key={info?.id}>
-                    {info?.name}  Rs:  
-                    {(info?.price || info?.defaultPrice || 0) / 100}
+                  <li
+                    key={info?.id}
+                    className="p-4 border rounded-lg shadow-sm bg-white flex justify-between"
+                  >
+                    <span className="font-medium text-gray-700">
+                      {info?.name}
+                    </span>
+
+                    <span className="text-gray-900 font-semibold">
+                      ₹{(info?.price || info?.defaultPrice || 0) / 100}
+                    </span>
                   </li>
                 );
               })}
@@ -69,7 +73,7 @@ const RestaurantMenu = () => {
         );
       })}
     </div>
-  ); 
+  );
 };
 
 export default RestaurantMenu;

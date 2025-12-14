@@ -5,14 +5,18 @@ import Body from "./components/Body";
 import About from "./components/About";
 import Contact from "./components/Contact";
 import Error from "./components/Error";
+import Footer from "./components/Footer";
 import RestaurantMenu from "./components/RestaurantMenu";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
 const AppLayout = () => {
     return (
-        <div className="app">
+        <div className="min-h-screen flex flex-col">
           <Header/>
-          <Outlet/>
+          <main className="flex-grow">
+            <Outlet />
+          </main>
+          <Footer />
         </div>
     )
 }
